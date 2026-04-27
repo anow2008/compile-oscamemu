@@ -14,16 +14,16 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make unzip
 
-      - name: Checkout Oscam Source
+      - name: Download Oscam Source (Archive Mode)
         run: |
-          # السحب في مجلد مؤقت لتجنب تضارب الصلاحيات (Exit code 128)
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git temp_src
-          # نقل الملفات للمجلد الرئيسي بما فيها الملفات المخفية
-          cp -rn temp_src/* .
-          cp -rn temp_src/.* . || true
-          rm -rf temp_src
+          # تحميل السورس كملف مضغوط لتخطي مشاكل الـ Git Auth نهائياً
+          curl -L https://github.com/oscam-emu/oscam/archive/refs/heads/master.zip -o oscam.zip
+          unzip oscam.zip
+          # نقل الملفات للمجلد الرئيسي (المجلد المفكوك سيكون اسمه oscam-master)
+          cp -r oscam-master/* .
+          rm -rf oscam-master oscam.zip
 
       - name: Get Oscam Revision
         id: get_rev
