@@ -42,9 +42,11 @@ jobs:
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
+               # --- Add-ons الكاملة كما في الصورة ---
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
+               WEBIF_UPNP=1 \
                TOUCH=0 \
                WITH_SSL=1 \
                HAVE_DVBAPI=1 \
@@ -65,21 +67,23 @@ jobs:
                WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
-               MODULE_CAMD33=0 \
-               MODULE_CAMD35=0 \
-               MODULE_CAMD35_TCP=0 \
+               # --- Protocols الكاملة ---
+               MODULE_CAMD33=1 \
+               MODULE_CAMD35=1 \
+               MODULE_CAMD35_TCP=1 \
                MODULE_NEWCAMD=1 \
                MODULE_CCCAM=1 \
                MODULE_CCCSHARE=1 \
                MODULE_GBOX=1 \
-               MODULE_RADEGAST=0 \
-               MODULE_SERIAL=0 \
+               MODULE_RADEGAST=1 \
+               MODULE_SERIAL=1 \
                MODULE_CONSTCW=1 \
-               MODULE_PANDORA=0 \
-               MODULE_GHTTP=0 \
+               MODULE_PANDORA=1 \
+               MODULE_GHTTP=1 \
                MODULE_SCAM=1 \
                MODULE_STREAMRELAY=1 \
                SOFTCAM_KEY=1 \
+               # --- Readers الكاملة ---
                READER_NAGRA=1 \
                READER_NAGRA_MERLIN=1 \
                READER_IRDETO=1 \
@@ -98,6 +102,7 @@ jobs:
                READER_DB2COM=0 \
                READER_STINGER=0 \
                READER_EMU=1 \
+               # --- EMU Systems ---
                WITH_BISS=1 \
                WITH_LONG_BISS=1 \
                WITH_POWERVU=1 \
