@@ -1,4 +1,4 @@
-name: Build Oscam-Emu Modern
+name: Build Oscam-Emu Modern-ARM4K
 
 on:
   workflow_dispatch:
@@ -18,7 +18,6 @@ jobs:
 
       - name: Checkout Oscam Source
         run: |
-          # الحل النهائي لمشكلة 128: استخدام رابط مباشر وتفريغ المجلد أولاً
           git clone --depth 1 https://github.com/oscam-emu/oscam.git .
 
       - name: Get Oscam Revision
@@ -44,32 +43,24 @@ jobs:
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
-               # --- [1] Add-ons كاملة بدون أي حذف ---
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
                WEBIF_UPNP=1 \
-               TOUCH=0 \
                WITH_SSL=1 \
                HAVE_DVBAPI=1 \
-               WITH_NEUTRINO=0 \
                READ_SDT_CHARSETS=1 \
                IRDETO_GUESSING=1 \
-               CS_ANTICASC=0 \
                WITH_DEBUG=1 \
                MODULE_MONITOR=1 \
                WITH_LB=1 \
                CS_CACHEEX=1 \
-               CS_CACHEEX_AIO=0 \
                CW_CYCLE_CHECK=1 \
-               LCDSUPPORT=0 \
-               LEDSUPPORT=0 \
                CLOCKFIX=1 \
                IPV6SUPPORT=1 \
                WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
-               # --- [2] Protocols كاملة بدون أي حذف ---
                MODULE_CAMD33=1 \
                MODULE_CAMD35=1 \
                MODULE_CAMD35_TCP=1 \
@@ -85,7 +76,6 @@ jobs:
                MODULE_SCAM=1 \
                MODULE_STREAMRELAY=1 \
                SOFTCAM_KEY=1 \
-               # --- [3] Readers كاملة بدون أي حذف ---
                READER_NAGRA=1 \
                READER_NAGRA_MERLIN=1 \
                READER_IRDETO=1 \
@@ -95,16 +85,7 @@ jobs:
                READER_VIACCESS=1 \
                READER_VIDEOGUARD=1 \
                READER_DRE=1 \
-               READER_TONGFANG=1 \
-               READER_BULCRYPT=1 \
-               READER_GRIFFIN=1 \
-               READER_DGCRYPT=1 \
-               READER_PCSC=0 \
-               READER_SMARGO=0 \
-               READER_DB2COM=0 \
-               READER_STINGER=0 \
                READER_EMU=1 \
-               # --- [4] Emu Systems ---
                WITH_BISS=1 \
                WITH_LONG_BISS=1 \
                WITH_POWERVU=1 \
