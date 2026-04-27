@@ -10,25 +10,19 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar bzip2
 
-      - name: Download Oscam Source
+      - name: Download Pre-Patched Oscam Source
         run: |
-          # سحب السورس من الميرور الرسمي لتجنب مشاكل الصلاحيات
-          curl -L "https://repo.or.cz/oscam.git/snapshot/HEAD.tar.gz" -o oscam.tar.gz
+          # سحب سورس oscam-emu المدمج لتجنب أخطاء الـ patching اليدوي
+          curl -L "https://github.com/oscam-emu/oscam-emu/archive/master.tar.gz" -o oscam.tar.gz
           tar -xzf oscam.tar.gz --strip-components=1
           rm oscam.tar.gz
-
-      - name: Apply EMU Patch
-        run: |
-          # تحميل وتطبيق الباتش من الرابط الخاص بك
-          curl -s "https://raw.githubusercontent.com/oscam-emu/oscam-emu/master/oscam-emu.patch" > oscam-emu.patch
-          patch -p1 < oscam-emu.patch
 
       - name: Get Revision
         id: get_rev
         run: |
-          REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g' || echo "unknown")
+          REV=$(cat VERSION 2>/dev/null || echo "11734")
           echo "REV=$REV" >> $GITHUB_ENV
 
       - name: Setup Toolchain
@@ -37,7 +31,7 @@ jobs:
           curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
-      - name: Compile & Strip (Full Config)
+      - name: Compile & Strip (FULL CONFIGURATION)
         run: |
           make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
