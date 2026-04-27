@@ -10,35 +10,26 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make unzip tar
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar
 
-      - name: Download Source Directly
+      - name: Download Oscam Source
         run: |
-          # مسح أي محاولات فاشلة
-          rm -rf *
-          # تحميل الأرشيف بصيغة tar.gz (أضمن من الـ ZIP في لينكس)
-          # الرابط ده "خام" ومستحيل يطلب Token
-          curl -L "https://github.com/oscam-emu/oscam/archive/master.tar.gz" -o oscam.tar.gz
-          
-          # فك الضغط في المكان الحالي مباشرة
+          # سحب السورس من الميرور الرسمي لتجنب مشاكل الصلاحيات
+          curl -L "https://repo.or.cz/oscam.git/snapshot/HEAD.tar.gz" -o oscam.tar.gz
           tar -xzf oscam.tar.gz --strip-components=1
           rm oscam.tar.gz
 
-      - name: Get Oscam Revision
+      - name: Apply EMU Patch
+        run: |
+          # تحميل وتطبيق الباتش من الرابط الخاص بك
+          curl -s "https://raw.githubusercontent.com/oscam-emu/oscam-emu/master/oscam-emu.patch" > oscam-emu.patch
+          patch -p1 < oscam-emu.patch
+
+      - name: Get Revision
         id: get_rev
         run: |
-          # التأكد إن الملفات نزلت فعلاً عن طريق قراءة ملف الإصدار
-          if [ -f "webif/pages.h" ]; then
-            REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g')
-            echo "REV=$REV" >> $GITHUB_ENV
-          else
-            echo "REV=unknown" >> $GITHUB_ENV
-          fi
-
-      - name: Apply Emu Patch
-        run: |
-          curl -s https://raw.githubusercontent.com/oscam-emu/oscam-emu/master/oscam-emu.patch > oscam-emu.patch
-          patch -p1 < oscam-emu.patch
+          REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g' || echo "unknown")
+          echo "REV=$REV" >> $GITHUB_ENV
 
       - name: Setup Toolchain
         run: |
@@ -46,25 +37,80 @@ jobs:
           curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
-      - name: Compile
+      - name: Compile & Strip (Full Config)
         run: |
           make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
                WEBIF=1 \
+               WEBIF_LIVELOG=1 \
+               WEBIF_JQUERY=1 \
+               WEBIF_UPNP=1 \
+               TOUCH=0 \
                WITH_SSL=1 \
                HAVE_DVBAPI=1 \
+               WITH_NEUTRINO=0 \
+               READ_SDT_CHARSETS=1 \
+               IRDETO_GUESSING=1 \
+               CS_ANTICASC=0 \
+               WITH_DEBUG=1 \
+               MODULE_MONITOR=1 \
+               WITH_LB=1 \
+               CS_CACHEEX=1 \
+               CS_CACHEEX_AIO=0 \
+               CW_CYCLE_CHECK=1 \
+               LCDSUPPORT=0 \
+               LEDSUPPORT=0 \
+               CLOCKFIX=1 \
+               IPV6SUPPORT=1 \
+               WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
+               MODULE_CAMD33=1 \
+               MODULE_CAMD35=1 \
+               MODULE_CAMD35_TCP=1 \
+               MODULE_NEWCAMD=1 \
+               MODULE_CCCAM=1 \
+               MODULE_CCCSHARE=1 \
+               MODULE_GBOX=1 \
+               MODULE_RADEGAST=1 \
+               MODULE_SERIAL=1 \
+               MODULE_CONSTCW=1 \
+               MODULE_PANDORA=1 \
+               MODULE_GHTTP=1 \
+               MODULE_SCAM=1 \
+               MODULE_STREAMRELAY=1 \
+               SOFTCAM_KEY=1 \
+               READER_NAGRA=1 \
+               READER_NAGRA_MERLIN=1 \
+               READER_IRDETO=1 \
+               READER_CONAX=1 \
+               READER_CRYPTOWORKS=1 \
+               READER_SECA=1 \
+               READER_VIACCESS=1 \
+               READER_VIDEOGUARD=1 \
+               READER_DRE=1 \
+               READER_TONGFANG=1 \
+               READER_BULCRYPT=1 \
+               READER_GRIFFIN=1 \
+               READER_DGCRYPT=1 \
+               READER_PCSC=0 \
+               READER_SMARGO=0 \
+               READER_DB2COM=0 \
+               READER_STINGER=0 \
+               READER_EMU=1 \
                WITH_BISS=1 \
-               WITH_POWERVU=1
+               WITH_LONG_BISS=1 \
+               WITH_POWERVU=1 \
+               WITH_TANDBERG=1 \
+               WITH_DRECAS=1 \
+               WITH_SCRYPT=1
 
-          # تنظيف الملف وتسميته
           arm-linux-gnueabi-strip Distribution/oscam*
           mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
 
-      - name: Upload
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: oscam-r${{ env.REV }}-ARM_4K
