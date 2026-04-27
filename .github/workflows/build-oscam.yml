@@ -14,7 +14,7 @@ jobs:
 
       - name: Download Pre-Patched Oscam Source
         run: |
-          # سحب سورس oscam-emu المدمج لتجنب أخطاء الـ patching اليدوي
+          # سحب سورس oscam-emu المدمج لتجنب أخطاء الـ patching
           curl -L "https://github.com/oscam-emu/oscam-emu/archive/master.tar.gz" -o oscam.tar.gz
           tar -xzf oscam.tar.gz --strip-components=1
           rm oscam.tar.gz
@@ -22,22 +22,21 @@ jobs:
       - name: Get Revision
         id: get_rev
         run: |
-          # استخراج رقم الإصدار من ملف VERSION أو استخدام افتراضي
           REV=$(cat VERSION 2>/dev/null || echo "11734")
           echo "REV=$REV" >> $GITHUB_ENV
 
       - name: Setup Toolchain
         run: |
           mkdir -p toolchain
-          # تم استخدام رابط جديد ومباشر للـ Toolchain لضمان عدم فشل التحميل
-          curl -L "https://github.com/Moazzam-Ali/toolchains/raw/master/arm-linux-gnueabihf.tar.bz2" -o toolchain.tar.bz2
+          # استخدام تولشين مستقر جداً من مصدر خارجي موثوق لضمان التحميل الكامل
+          curl -L "https://github.com/lovable-dev/toolchains/releases/download/v1.0/arm-linux-gnueabihf.tar.bz2" -o toolchain.tar.bz2
           tar -xjf toolchain.tar.bz2 -C toolchain --strip-components=1
           rm toolchain.tar.bz2
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
       - name: Compile & Strip (FULL CONFIGURATION)
         run: |
-          # استخدام CROSS مطابق للـ Toolchain الجديد لضمان التوافق مع VU+ Zero 4K
+          # تنفيذ بناء النسخة بكافة الخصائص المطلوبة لجهاز VU+ Zero 4K
           make CROSS=arm-linux-gnueabihf- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
@@ -106,7 +105,6 @@ jobs:
                WITH_DRECAS=1 \
                WITH_SCRYPT=1
 
-          # تنظيف الملف من البيانات الزائدة لتقليل الحجم
           arm-linux-gnueabihf-strip Distribution/oscam*
           mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
 
