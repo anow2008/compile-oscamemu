@@ -16,13 +16,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make
 
-      - name: Checkout Oscam SVN
+      - name: Checkout Oscam Source
         run: |
-          svn checkout https://svn.streamboard.tv/oscam/trunk oscam-svn \
-              --non-interactive \
-              --trust-server-cert-failures=expired,unknown-ca,cn-mismatch \
-              --trust-server-cert
-          cp -r oscam-svn/* .
+          # السحب من Mirror سريع وموثوق يتخطى مشاكل سيرفر Streamboard
+          git clone --depth 1 https://github.com/oscam-emu/oscam.git .
 
       - name: Get Oscam Revision
         id: get_rev
