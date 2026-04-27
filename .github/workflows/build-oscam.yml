@@ -17,7 +17,9 @@ jobs:
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git
 
       - name: Checkout Oscam Source
-        run: git clone --depth 1 https://github.com/oscam-emu/oscam.git .
+        run: |
+          # الحل النهائي لمشكلة 128: استخدام رابط مباشر وتفريغ المجلد أولاً
+          git clone --depth 1 https://github.com/oscam-emu/oscam.git .
 
       - name: Get Oscam Revision
         id: get_rev
@@ -42,7 +44,7 @@ jobs:
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
-               # --- Add-ons الكاملة كما في الصورة ---
+               # --- [1] Add-ons كاملة بدون أي حذف ---
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
@@ -67,7 +69,7 @@ jobs:
                WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
-               # --- Protocols الكاملة ---
+               # --- [2] Protocols كاملة بدون أي حذف ---
                MODULE_CAMD33=1 \
                MODULE_CAMD35=1 \
                MODULE_CAMD35_TCP=1 \
@@ -83,7 +85,7 @@ jobs:
                MODULE_SCAM=1 \
                MODULE_STREAMRELAY=1 \
                SOFTCAM_KEY=1 \
-               # --- Readers الكاملة ---
+               # --- [3] Readers كاملة بدون أي حذف ---
                READER_NAGRA=1 \
                READER_NAGRA_MERLIN=1 \
                READER_IRDETO=1 \
@@ -102,7 +104,7 @@ jobs:
                READER_DB2COM=0 \
                READER_STINGER=0 \
                READER_EMU=1 \
-               # --- EMU Systems ---
+               # --- [4] Emu Systems ---
                WITH_BISS=1 \
                WITH_LONG_BISS=1 \
                WITH_POWERVU=1 \
