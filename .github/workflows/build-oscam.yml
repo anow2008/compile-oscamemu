@@ -18,13 +18,12 @@ jobs:
 
       - name: Checkout Oscam Source
         run: |
-          # السحب باستخدام SVN عبر بروتوكول HTTP العادي لتفادي مشاكل الـ SSL والـ Auth
-          # مع إضافة خيارات التخطى لضمان عدم توقف السكريبت
-          svn checkout http://svn.streamboard.tv/oscam/trunk . \
-              --non-interactive \
-              --trust-server-cert-failures=expired,unknown-ca,cn-mismatch \
-              --trust-server-cert || \
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git .
+          # حل مشكلة الـ Safe Directory والـ Auth نهائياً
+          git config --global --add safe.directory /home/runner/work/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+          
+          # السحب باستخدام بروتوكول git المباشر (أسرع وأضمن)
+          git clone --depth 1 https://github.com/oscam-emu/oscam.git . || \
+          git clone --depth 1 http://github.com/oscam-emu/oscam.git .
 
       - name: Get Oscam Revision
         id: get_rev
