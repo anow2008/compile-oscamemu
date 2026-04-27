@@ -3,6 +3,10 @@ name: Build Oscam-SVN Modern-ARM4K
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,38 +14,36 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar xz-utils bzip2
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar xz-utils bzip2 git
 
-      - name: Download Pre-Patched Oscam Source
+      - name: Download Oscam Source
         run: |
-          # سحب سورس oscam-emu المدمج
-          curl -L "https://github.com/oscam-emu/oscam-emu/archive/master.tar.gz" -o oscam.tar.gz
-          mkdir -p oscam_src
-          tar -xzf oscam.tar.gz -C oscam_src --strip-components=1
-          rm oscam.tar.gz
+          git clone --depth 1 https://github.com/oscam-emu/oscam.git oscam_src
 
       - name: Get Revision
         id: get_rev
         run: |
-          # استخراج رقم النسخة من داخل مجلد السورس
           cd oscam_src
-          REV=$(cat VERSION 2>/dev/null || echo "11734")
+          REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g' || echo "11734")
           echo "REV=$REV" >> $GITHUB_ENV
 
-      - name: Setup Official Arm Toolchain
+      - name: Apply Emu Patch
+        run: |
+          cd oscam_src
+          curl -s https://raw.githubusercontent.com/oscam-emu/oscam-emu/master/oscam-emu.patch > oscam-emu.patch
+          patch -p1 < oscam-emu.patch
+
+      - name: Setup Stable Toolchain
         run: |
           mkdir -p toolchain
-          # تحميل التولشين الرسمي من Arm لضمان الاستقرار
-          curl -L "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz" -o toolchain.tar.xz
-          tar -xJf toolchain.tar.xz -C toolchain --strip-components=1
-          rm toolchain.tar.xz
+          # استخدام تولشين مجربة ومستقرة لأجهزة 4K
+          curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
-      - name: Compile & Strip (FULL CONFIGURATION)
+      - name: Compile & Strip
         run: |
-          # الدخول لمجلد السورس قبل البدء في الـ Make
           cd oscam_src
-          make CROSS=arm-none-linux-gnueabihf- \
+          make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
@@ -109,8 +111,7 @@ jobs:
                WITH_DRECAS=1 \
                WITH_SCRYPT=1
 
-          # تنظيف الملف ونقله للمجلد الرئيسي للرفع
-          arm-none-linux-gnueabihf-strip Distribution/oscam*
+          arm-linux-gnueabi-strip Distribution/oscam*
           cp Distribution/oscam* ../oscam-r${{ env.REV }}-emu-ARM_4K
 
       - name: Upload Artifacts
