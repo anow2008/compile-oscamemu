@@ -17,12 +17,9 @@ jobs:
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make unzip
 
       - name: Checkout Oscam Source
-        # ده الحل الوحيد اللي بيستخدم التوكن الداخلي بتاع جيتهاب عشان يفتح السحب
-        uses: actions/checkout@v4
-        with:
-          repository: oscam-emu/oscam
-          path: '.'
-          clean: true
+        run: |
+          # استخدام svn export بيسحب الكود من غير ما يطلب أي Auth أو Token
+          svn export https://github.com/oscam-emu/oscam/trunk . --force --non-interactive
 
       - name: Get Oscam Revision
         id: get_rev
