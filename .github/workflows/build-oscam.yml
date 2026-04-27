@@ -3,10 +3,6 @@ name: Build Oscam-SVN Modern-ARM4K
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-  actions: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,26 +10,30 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make unzip
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make unzip tar
 
-      - name: Checkout Oscam Source (Raw ZIP Method)
+      - name: Download Source Directly
         run: |
-          # تحميل الملف كـ ZIP مباشرة من رابط الأرشيف الخام
-          curl -L "https://github.com/oscam-emu/oscam/archive/refs/heads/master.zip" -o oscam.zip
+          # مسح أي محاولات فاشلة
+          rm -rf *
+          # تحميل الأرشيف بصيغة tar.gz (أضمن من الـ ZIP في لينكس)
+          # الرابط ده "خام" ومستحيل يطلب Token
+          curl -L "https://github.com/oscam-emu/oscam/archive/master.tar.gz" -o oscam.tar.gz
           
-          # فك الضغط
-          unzip oscam.zip
-          
-          # نقل الملفات للمجلد الرئيسي
-          cp -r oscam-master/* .
-          rm -rf oscam-master oscam.zip
+          # فك الضغط في المكان الحالي مباشرة
+          tar -xzf oscam.tar.gz --strip-components=1
+          rm oscam.tar.gz
 
       - name: Get Oscam Revision
         id: get_rev
         run: |
-          # استخراج رقم الإصدار لضمان أن الملفات تم سحبها بنجاح
-          REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g' || echo "unknown")
-          echo "REV=$REV" >> $GITHUB_ENV
+          # التأكد إن الملفات نزلت فعلاً عن طريق قراءة ملف الإصدار
+          if [ -f "webif/pages.h" ]; then
+            REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g')
+            echo "REV=$REV" >> $GITHUB_ENV
+          else
+            echo "REV=unknown" >> $GITHUB_ENV
+          fi
 
       - name: Apply Emu Patch
         run: |
@@ -46,7 +46,7 @@ jobs:
           curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
-      - name: Compile & Strip
+      - name: Compile
         run: |
           make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
@@ -60,10 +60,11 @@ jobs:
                WITH_BISS=1 \
                WITH_POWERVU=1
 
+          # تنظيف الملف وتسميته
           arm-linux-gnueabi-strip Distribution/oscam*
           mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
 
-      - name: Upload Artifacts
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: oscam-r${{ env.REV }}-ARM_4K
