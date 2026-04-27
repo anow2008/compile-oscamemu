@@ -1,4 +1,4 @@
-name: Build Oscam-Emu Modern-ARM4K
+name: Build Oscam-SVN Modern-ARM4K
 
 on:
   workflow_dispatch:
@@ -14,11 +14,13 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make
 
-      - name: Checkout Oscam Source
+      - name: Checkout Oscam SVN
         run: |
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git .
+          svn checkout https://svn.streamboard.tv/oscam/trunk oscam-svn
+          # Move files to current directory to keep paths consistent
+          cp -r oscam-svn/* .
 
       - name: Get Oscam Revision
         id: get_rev
