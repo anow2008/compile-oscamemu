@@ -16,14 +16,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make tar
 
-      - name: Checkout Oscam Source (Brute Force Method)
-        run: |
-          # مسح أي محاولات قديمة تماماً
-          rm -rf *
-          # سحب السورس كأرشيف من رابط الـ Mirror الرسمي المباشر
-          curl -k -L "https://repo.or.cz/oscam.git/snapshot/HEAD.tar.gz" -o oscam.tar.gz
-          tar -xzf oscam.tar.gz --strip-components=1
-          rm oscam.tar.gz
+      - name: Checkout Oscam Source
+        # استخدام الأكشن الرسمي مع إلغاء الـ Persist-credentials يمنع طلب الـ Token نهائياً
+        uses: actions/checkout@v4
+        with:
+          repository: oscam-emu/oscam
+          persist-credentials: false
+          path: '.'
 
       - name: Get Oscam Revision
         id: get_rev
