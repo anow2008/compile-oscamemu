@@ -10,16 +10,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - arch: "ARM_4K"
-            toolchain_url: "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2"
-            cross_prefix: "arm-linux-gnueabi-"
-          - arch: "MIPSEL_Old"
-            toolchain_url: "https://github.com/stay-at-home/toolchains/raw/master/mipsel-unknown-linux-gnu.tar.bz2"
-            cross_prefix: "mipsel-unknown-linux-gnu-"
-
     steps:
       - name: Clean Workspace
         run: |
@@ -46,35 +36,59 @@ jobs:
           curl -s https://raw.githubusercontent.com/oscam-emu/oscam-emu/master/oscam-emu.patch > oscam-emu.patch
           patch -p1 < oscam-emu.patch
 
-      - name: Setup Toolchain
+      - name: Setup Toolchain (ARM 4K Only)
         run: |
           mkdir -p toolchain
-          curl -L ${{ matrix.toolchain_url }} | tar -xj -C toolchain --strip-components=1
+          curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
       - name: Compile & Strip
         run: |
-          make CROSS=${{ matrix.cross_prefix }} \
+          make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
+               # --- [1] قائمة الإضافات الكاملة (Add-ons) ---
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
+               TOUCH=0 \
+               WITH_SSL=1 \
                HAVE_DVBAPI=1 \
+               WITH_NEUTRINO=0 \
                READ_SDT_CHARSETS=1 \
                IRDETO_GUESSING=1 \
+               CS_ANTICASC=0 \
                WITH_DEBUG=1 \
                MODULE_MONITOR=1 \
                WITH_LB=1 \
                CS_CACHEEX=1 \
+               CS_CACHEEX_AIO=0 \
                CW_CYCLE_CHECK=1 \
+               LCDSUPPORT=0 \
+               LEDSUPPORT=0 \
+               CLOCKFIX=1 \
+               IPV6SUPPORT=1 \
+               WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
+               # --- [2] قائمة البروتوكولات الكاملة (Protocols) ---
+               MODULE_CAMD33=0 \
+               MODULE_CAMD35=0 \
+               MODULE_CAMD35_TCP=0 \
                MODULE_NEWCAMD=1 \
                MODULE_CCCAM=1 \
                MODULE_CCCSHARE=1 \
+               MODULE_GBOX=1 \
+               MODULE_RADEGAST=0 \
+               MODULE_SERIAL=0 \
+               MODULE_CONSTCW=1 \
+               MODULE_PANDORA=0 \
+               MODULE_GHTTP=0 \
+               MODULE_SCAM=1 \
+               MODULE_STREAMRELAY=1 \
                SOFTCAM_KEY=1 \
+               # --- [3] قائمة أنظمة التشفير الكاملة (Readers) ---
                READER_NAGRA=1 \
                READER_NAGRA_MERLIN=1 \
                READER_IRDETO=1 \
@@ -88,7 +102,12 @@ jobs:
                READER_BULCRYPT=1 \
                READER_GRIFFIN=1 \
                READER_DGCRYPT=1 \
+               READER_PCSC=0 \
+               READER_SMARGO=0 \
+               READER_DB2COM=0 \
+               READER_STINGER=0 \
                READER_EMU=1 \
+               # --- [4] أنظمة شفرات الإيمو ---
                WITH_BISS=1 \
                WITH_LONG_BISS=1 \
                WITH_POWERVU=1 \
@@ -96,11 +115,11 @@ jobs:
                WITH_DRECAS=1 \
                WITH_SCRYPT=1
 
-          ${{ matrix.cross_prefix }}strip Distribution/oscam*
-          mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-${{ matrix.arch }}
+          arm-linux-gnueabi-strip Distribution/oscam*
+          mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: oscam-r${{ env.REV }}-${{ matrix.arch }}
-          path: oscam-r${{ env.REV }}-emu-${{ matrix.arch }}
+          name: oscam-r${{ env.REV }}-ARM_4K
+          path: oscam-r${{ env.REV }}-emu-ARM_4K
