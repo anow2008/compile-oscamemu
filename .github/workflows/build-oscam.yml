@@ -17,9 +17,11 @@ jobs:
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make
 
       - name: Checkout Oscam Source
-        run: |
-          # استخدام الـ Token الافتراضي لتخطي طلب الـ Username نهائياً
-          git clone --depth 1 https://${{ github.token }}@github.com/oscam-emu/oscam.git .
+        # استخدام الأكشن الرسمي يحل مشكلة الـ 128 والـ Password نهائياً
+        uses: actions/checkout@v4
+        with:
+          repository: oscam-emu/oscam
+          fetch-depth: 1
 
       - name: Get Oscam Revision
         id: get_rev
