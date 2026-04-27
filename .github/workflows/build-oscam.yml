@@ -20,7 +20,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git
 
       - name: Checkout Oscam Source
         run: git clone https://github.com/oscam-emu/oscam.git .
