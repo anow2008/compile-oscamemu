@@ -18,8 +18,10 @@ jobs:
 
       - name: Checkout Oscam SVN
         run: |
-          svn checkout https://svn.streamboard.tv/oscam/trunk oscam-svn
-          # Move files to current directory to keep paths consistent
+          svn checkout https://svn.streamboard.tv/oscam/trunk oscam-svn \
+              --non-interactive \
+              --trust-server-cert-failures=expired,unknown-ca,cn-mismatch \
+              --trust-server-cert
           cp -r oscam-svn/* .
 
       - name: Get Oscam Revision
@@ -49,15 +51,21 @@ jobs:
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
                WEBIF_UPNP=1 \
+               TOUCH=0 \
                WITH_SSL=1 \
                HAVE_DVBAPI=1 \
+               WITH_NEUTRINO=0 \
                READ_SDT_CHARSETS=1 \
                IRDETO_GUESSING=1 \
+               CS_ANTICASC=0 \
                WITH_DEBUG=1 \
                MODULE_MONITOR=1 \
                WITH_LB=1 \
                CS_CACHEEX=1 \
+               CS_CACHEEX_AIO=0 \
                CW_CYCLE_CHECK=1 \
+               LCDSUPPORT=0 \
+               LEDSUPPORT=0 \
                CLOCKFIX=1 \
                IPV6SUPPORT=1 \
                WITH_LIBCURL=1 \
@@ -87,6 +95,14 @@ jobs:
                READER_VIACCESS=1 \
                READER_VIDEOGUARD=1 \
                READER_DRE=1 \
+               READER_TONGFANG=1 \
+               READER_BULCRYPT=1 \
+               READER_GRIFFIN=1 \
+               READER_DGCRYPT=1 \
+               READER_PCSC=0 \
+               READER_SMARGO=0 \
+               READER_DB2COM=0 \
+               READER_STINGER=0 \
                READER_EMU=1 \
                WITH_BISS=1 \
                WITH_LONG_BISS=1 \
