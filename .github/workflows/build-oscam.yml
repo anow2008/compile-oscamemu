@@ -3,6 +3,10 @@ name: Build Oscam-Emu Modern
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,7 +27,8 @@ jobs:
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git
 
       - name: Checkout Oscam Source
-        run: git clone https://github.com/oscam-emu/oscam.git .
+        run: |
+          git clone --depth 1 https://github.com/oscam-emu/oscam.git .
 
       - name: Get Oscam Revision
         id: get_rev
@@ -51,19 +56,17 @@ jobs:
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
-               WEBIF_UPNP=1 \
-               TOUCH=1 \
+               TOUCH=0 \
                WITH_SSL=1 \
                HAVE_DVBAPI=1 \
-               WITH_NEUTRINO=1 \
+               WITH_NEUTRINO=0 \
                READ_SDT_CHARSETS=1 \
                IRDETO_GUESSING=1 \
-               CS_ANTICASC=1 \
+               CS_ANTICASC=0 \
                WITH_DEBUG=1 \
                MODULE_MONITOR=1 \
                WITH_LB=1 \
                CS_CACHEEX=1 \
-               CS_CACHEEX_AIO=1 \
                CW_CYCLE_CHECK=1 \
                LCDSUPPORT=0 \
                LEDSUPPORT=0 \
@@ -72,20 +75,11 @@ jobs:
                WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
-               MODULE_CAMD33=1 \
-               MODULE_CAMD35=1 \
-               MODULE_CAMD35_TCP=1 \
                MODULE_NEWCAMD=1 \
                MODULE_CCCAM=1 \
                MODULE_CCCSHARE=1 \
                MODULE_GBOX=1 \
-               MODULE_RADEGAST=1 \
-               MODULE_SERIAL=1 \
                MODULE_CONSTCW=1 \
-               MODULE_PANDORA=1 \
-               MODULE_GHTTP=1 \
-               MODULE_SCAM=1 \
-               MODULE_STREAMRELAY=1 \
                SOFTCAM_KEY=1 \
                READER_NAGRA=1 \
                READER_NAGRA_MERLIN=1 \
@@ -100,8 +94,6 @@ jobs:
                READER_BULCRYPT=1 \
                READER_GRIFFIN=1 \
                READER_DGCRYPT=1 \
-               READER_PCSC=0 \
-               READER_SMARGO=0 \
                READER_EMU=1 \
                WITH_BISS=1 \
                WITH_LONG_BISS=1 \
