@@ -10,11 +10,11 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar bzip2
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar xz-utils bzip2
 
       - name: Download Pre-Patched Oscam Source
         run: |
-          # سحب سورس oscam-emu المدمج لتجنب أخطاء الـ patching
+          # سحب سورس oscam-emu المدمج لتفادي أخطاء الـ patching اليدوية
           curl -L "https://github.com/oscam-emu/oscam-emu/archive/master.tar.gz" -o oscam.tar.gz
           tar -xzf oscam.tar.gz --strip-components=1
           rm oscam.tar.gz
@@ -25,19 +25,20 @@ jobs:
           REV=$(cat VERSION 2>/dev/null || echo "11734")
           echo "REV=$REV" >> $GITHUB_ENV
 
-      - name: Setup Toolchain
+      - name: Setup Official Arm Toolchain
         run: |
+          # استخدام رابط رسمي ومباشر من Arm لضمان استقرار التحميل
           mkdir -p toolchain
-          # استخدام تولشين مستقر جداً من مصدر خارجي موثوق لضمان التحميل الكامل
-          curl -L "https://github.com/lovable-dev/toolchains/releases/download/v1.0/arm-linux-gnueabihf.tar.bz2" -o toolchain.tar.bz2
-          tar -xjf toolchain.tar.bz2 -C toolchain --strip-components=1
-          rm toolchain.tar.bz2
+          curl -L "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz" -o toolchain.tar.xz
+          tar -xJf toolchain.tar.xz -C toolchain --strip-components=1
+          rm toolchain.tar.xz
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
       - name: Compile & Strip (FULL CONFIGURATION)
         run: |
-          # تنفيذ بناء النسخة بكافة الخصائص المطلوبة لجهاز VU+ Zero 4K
-          make CROSS=arm-linux-gnueabihf- \
+          # بناء النسخة بكافة الخصائص المطلوبة لجهاز VU+ Zero 4K
+          # لاحظ تغيير الـ CROSS ليتناسب مع Toolchain شركة Arm الرسمي
+          make CROSS=arm-none-linux-gnueabihf- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
@@ -105,7 +106,7 @@ jobs:
                WITH_DRECAS=1 \
                WITH_SCRYPT=1
 
-          arm-linux-gnueabihf-strip Distribution/oscam*
+          arm-none-linux-gnueabihf-strip Distribution/oscam*
           mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
 
       - name: Upload Artifacts
