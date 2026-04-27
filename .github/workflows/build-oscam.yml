@@ -16,10 +16,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make tar
 
-      - name: Checkout Oscam Source (Direct Archive)
+      - name: Checkout Oscam Source (Final Method)
         run: |
-          # تحميل السورس كملف أرشيف مباشر لتجنب Git و SVN و Tokens نهائياً
-          wget https://github.com/oscam-emu/oscam/archive/refs/heads/master.tar.gz -O oscam.tar.gz
+          # تحميل السورس كأرشيف مباشر برابط مستقر تماماً
+          curl -L https://github.com/oscam-emu/oscam/archive/master.tar.gz -o oscam.tar.gz
           tar -xzf oscam.tar.gz --strip-components=1
           rm oscam.tar.gz
 
