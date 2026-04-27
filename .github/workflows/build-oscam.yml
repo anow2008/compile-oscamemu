@@ -18,13 +18,16 @@ jobs:
 
       - name: Checkout Oscam Source
         run: |
-          # السحب باستخدام رابط مباشر بدون Auth لتجنب مشاكل الـ Permissions
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git .
+          # السحب في مجلد مؤقت لتجنب تضارب الصلاحيات (Exit code 128)
+          git clone --depth 1 https://github.com/oscam-emu/oscam.git temp_src
+          # نقل الملفات للمجلد الرئيسي بما فيها الملفات المخفية
+          cp -rn temp_src/* .
+          cp -rn temp_src/.* . || true
+          rm -rf temp_src
 
       - name: Get Oscam Revision
         id: get_rev
         run: |
-          # التأكد من استخراج الرقم الصحيح للـ Revision
           REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g' || echo "unknown")
           echo "REV=$REV" >> $GITHUB_ENV
 
