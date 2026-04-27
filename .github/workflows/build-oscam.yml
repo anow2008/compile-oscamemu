@@ -14,11 +14,15 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
+          # حل مشكلة libusb النهائية وتثبيت كل المكتبات المطلوبة
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar xz-utils bzip2 git
 
       - name: Download Oscam Source
         run: |
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git oscam_src
+          # استخدام wget بدل git clone لتفادي خطأ 128 نهائياً
+          wget https://github.com/oscam-emu/oscam/archive/refs/heads/master.zip
+          unzip master.zip
+          mv oscam-master oscam_src
 
       - name: Get Revision
         id: get_rev
@@ -36,17 +40,17 @@ jobs:
       - name: Setup Stable Toolchain
         run: |
           mkdir -p toolchain
-          # استخدام تولشين مجربة ومستقرة لأجهزة 4K
           curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
-      - name: Compile & Strip
+      - name: Compile & Strip (FULL CONFIG)
         run: |
           cd oscam_src
           make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
+               # --- القائمة الكاملة بدون أي حذف ---
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
