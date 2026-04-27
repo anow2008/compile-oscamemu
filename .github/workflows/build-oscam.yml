@@ -14,21 +14,24 @@ jobs:
 
       - name: Download Pre-Patched Oscam Source
         run: |
-          # سحب سورس oscam-emu المدمج لتفادي أخطاء الـ patching اليدوية
+          # سحب سورس oscam-emu المدمج
           curl -L "https://github.com/oscam-emu/oscam-emu/archive/master.tar.gz" -o oscam.tar.gz
-          tar -xzf oscam.tar.gz --strip-components=1
+          mkdir -p oscam_src
+          tar -xzf oscam.tar.gz -C oscam_src --strip-components=1
           rm oscam.tar.gz
 
       - name: Get Revision
         id: get_rev
         run: |
+          # استخراج رقم النسخة من داخل مجلد السورس
+          cd oscam_src
           REV=$(cat VERSION 2>/dev/null || echo "11734")
           echo "REV=$REV" >> $GITHUB_ENV
 
       - name: Setup Official Arm Toolchain
         run: |
-          # استخدام رابط رسمي ومباشر من Arm لضمان استقرار التحميل
           mkdir -p toolchain
+          # تحميل التولشين الرسمي من Arm لضمان الاستقرار
           curl -L "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz" -o toolchain.tar.xz
           tar -xJf toolchain.tar.xz -C toolchain --strip-components=1
           rm toolchain.tar.xz
@@ -36,8 +39,8 @@ jobs:
 
       - name: Compile & Strip (FULL CONFIGURATION)
         run: |
-          # بناء النسخة بكافة الخصائص المطلوبة لجهاز VU+ Zero 4K
-          # لاحظ تغيير الـ CROSS ليتناسب مع Toolchain شركة Arm الرسمي
+          # الدخول لمجلد السورس قبل البدء في الـ Make
+          cd oscam_src
           make CROSS=arm-none-linux-gnueabihf- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
@@ -106,8 +109,9 @@ jobs:
                WITH_DRECAS=1 \
                WITH_SCRYPT=1
 
+          # تنظيف الملف ونقله للمجلد الرئيسي للرفع
           arm-none-linux-gnueabihf-strip Distribution/oscam*
-          mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
+          cp Distribution/oscam* ../oscam-r${{ env.REV }}-emu-ARM_4K
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
