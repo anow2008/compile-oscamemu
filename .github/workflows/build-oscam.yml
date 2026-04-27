@@ -22,18 +22,23 @@ jobs:
       - name: Get Revision
         id: get_rev
         run: |
+          # استخراج رقم الإصدار من ملف VERSION أو استخدام افتراضي
           REV=$(cat VERSION 2>/dev/null || echo "11734")
           echo "REV=$REV" >> $GITHUB_ENV
 
       - name: Setup Toolchain
         run: |
           mkdir -p toolchain
-          curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
+          # تم استخدام رابط جديد ومباشر للـ Toolchain لضمان عدم فشل التحميل
+          curl -L "https://github.com/Moazzam-Ali/toolchains/raw/master/arm-linux-gnueabihf.tar.bz2" -o toolchain.tar.bz2
+          tar -xjf toolchain.tar.bz2 -C toolchain --strip-components=1
+          rm toolchain.tar.bz2
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
       - name: Compile & Strip (FULL CONFIGURATION)
         run: |
-          make CROSS=arm-linux-gnueabi- \
+          # استخدام CROSS مطابق للـ Toolchain الجديد لضمان التوافق مع VU+ Zero 4K
+          make CROSS=arm-linux-gnueabihf- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
@@ -101,7 +106,8 @@ jobs:
                WITH_DRECAS=1 \
                WITH_SCRYPT=1
 
-          arm-linux-gnueabi-strip Distribution/oscam*
+          # تنظيف الملف من البيانات الزائدة لتقليل الحجم
+          arm-linux-gnueabihf-strip Distribution/oscam*
           mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
 
       - name: Upload Artifacts
