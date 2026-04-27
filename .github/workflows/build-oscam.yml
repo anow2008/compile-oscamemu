@@ -18,8 +18,8 @@ jobs:
 
       - name: Checkout Oscam Source
         run: |
-          # تنظيف المجلد تماماً وسحب السورس برابط git مباشر
-          git clone --depth 1 https://github.com/oscam-emu/oscam .
+          # استخدام الـ Token الافتراضي لتخطي طلب الـ Username نهائياً
+          git clone --depth 1 https://${{ github.token }}@github.com/oscam-emu/oscam.git .
 
       - name: Get Oscam Revision
         id: get_rev
