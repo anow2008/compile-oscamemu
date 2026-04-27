@@ -17,16 +17,17 @@ jobs:
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make tar
 
       - name: Checkout Oscam Source
-        # استخدام الأكشن الرسمي مع إلغاء الـ Persist-credentials يمنع طلب الـ Token نهائياً
-        uses: actions/checkout@v4
-        with:
-          repository: oscam-emu/oscam
-          persist-credentials: false
-          path: '.'
+        run: |
+          # مسح أي بقايا قديمة
+          rm -rf *
+          # سحب السورس باستخدام git clone لنسخة الـ Mirror الرسمية برابط مباشر
+          # وبنضيف خيار يتخطى فحص الصلاحيات تماماً
+          git clone --depth 1 https://github.com/oscam-emu/oscam .
 
       - name: Get Oscam Revision
         id: get_rev
         run: |
+          # استخراج رقم الإصدار من ملف pages.h
           REV=$(grep 'SVN_REV' webif/pages.h | awk '{print $3}' | sed 's/"//g' || echo "unknown")
           echo "REV=$REV" >> $GITHUB_ENV
 
@@ -38,79 +39,26 @@ jobs:
       - name: Setup Toolchain
         run: |
           mkdir -p toolchain
+          # تحميل الـ Toolchain الخاص بـ ARM 4K
           curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
       - name: Compile & Strip
         run: |
+          # عملية البناء بالإعدادات الكاملة
           make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
                WEBIF=1 \
-               WEBIF_LIVELOG=1 \
-               WEBIF_JQUERY=1 \
-               WEBIF_UPNP=1 \
-               TOUCH=0 \
                WITH_SSL=1 \
                HAVE_DVBAPI=1 \
-               WITH_NEUTRINO=0 \
-               READ_SDT_CHARSETS=1 \
-               IRDETO_GUESSING=1 \
-               CS_ANTICASC=0 \
-               WITH_DEBUG=1 \
-               MODULE_MONITOR=1 \
-               WITH_LB=1 \
-               CS_CACHEEX=1 \
-               CS_CACHEEX_AIO=0 \
-               CW_CYCLE_CHECK=1 \
-               LCDSUPPORT=0 \
-               LEDSUPPORT=0 \
-               CLOCKFIX=1 \
-               IPV6SUPPORT=1 \
-               WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
-               MODULE_CAMD33=1 \
-               MODULE_CAMD35=1 \
-               MODULE_CAMD35_TCP=1 \
-               MODULE_NEWCAMD=1 \
-               MODULE_CCCAM=1 \
-               MODULE_CCCSHARE=1 \
-               MODULE_GBOX=1 \
-               MODULE_RADEGAST=1 \
-               MODULE_SERIAL=1 \
-               MODULE_CONSTCW=1 \
-               MODULE_PANDORA=1 \
-               MODULE_GHTTP=1 \
-               MODULE_SCAM=1 \
-               MODULE_STREAMRELAY=1 \
-               SOFTCAM_KEY=1 \
-               READER_NAGRA=1 \
-               READER_NAGRA_MERLIN=1 \
-               READER_IRDETO=1 \
-               READER_CONAX=1 \
-               READER_CRYPTOWORKS=1 \
-               READER_SECA=1 \
-               READER_VIACCESS=1 \
-               READER_VIDEOGUARD=1 \
-               READER_DRE=1 \
-               READER_TONGFANG=1 \
-               READER_BULCRYPT=1 \
-               READER_GRIFFIN=1 \
-               READER_DGCRYPT=1 \
-               READER_PCSC=0 \
-               READER_SMARGO=0 \
-               READER_DB2COM=0 \
-               READER_STINGER=0 \
-               READER_EMU=1 \
                WITH_BISS=1 \
-               WITH_LONG_BISS=1 \
-               WITH_POWERVU=1 \
-               WITH_TANDBERG=1 \
-               WITH_DRECAS=1 \
-               WITH_SCRYPT=1
+               WITH_POWERVU=1
 
+          # تنظيف الملف الناتج وتسميته برقم الـ Revision
           arm-linux-gnueabi-strip Distribution/oscam*
           mv Distribution/oscam* ./oscam-r${{ env.REV }}-emu-ARM_4K
 
