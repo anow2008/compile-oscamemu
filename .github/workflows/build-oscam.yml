@@ -21,6 +21,11 @@ jobs:
             cross_prefix: "mipsel-unknown-linux-gnu-"
 
     steps:
+      - name: Clean Workspace
+        run: |
+          rm -rf *
+          rm -rf .git
+          
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -56,30 +61,19 @@ jobs:
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
-               TOUCH=0 \
-               WITH_SSL=1 \
                HAVE_DVBAPI=1 \
-               WITH_NEUTRINO=0 \
                READ_SDT_CHARSETS=1 \
                IRDETO_GUESSING=1 \
-               CS_ANTICASC=0 \
                WITH_DEBUG=1 \
                MODULE_MONITOR=1 \
                WITH_LB=1 \
                CS_CACHEEX=1 \
                CW_CYCLE_CHECK=1 \
-               LCDSUPPORT=0 \
-               LEDSUPPORT=0 \
-               CLOCKFIX=1 \
-               IPV6SUPPORT=1 \
-               WITH_LIBCURL=1 \
                WITH_EMU=1 \
                WITH_SOFTCAM=1 \
                MODULE_NEWCAMD=1 \
                MODULE_CCCAM=1 \
                MODULE_CCCSHARE=1 \
-               MODULE_GBOX=1 \
-               MODULE_CONSTCW=1 \
                SOFTCAM_KEY=1 \
                READER_NAGRA=1 \
                READER_NAGRA_MERLIN=1 \
