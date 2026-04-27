@@ -18,8 +18,8 @@ jobs:
 
       - name: Checkout Oscam Source
         run: |
-          # السحب من Mirror سريع وموثوق يتخطى مشاكل سيرفر Streamboard
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git .
+          # تنظيف المجلد تماماً وسحب السورس برابط git مباشر
+          git clone --depth 1 https://github.com/oscam-emu/oscam .
 
       - name: Get Oscam Revision
         id: get_rev
