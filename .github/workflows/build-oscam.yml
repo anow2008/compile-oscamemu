@@ -17,13 +17,12 @@ jobs:
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl git subversion gcc make unzip
 
       - name: Checkout Oscam Source
-        run: |
-          # حل مشكلة الـ Safe Directory والـ Auth نهائياً
-          git config --global --add safe.directory /home/runner/work/${{ github.event.repository.name }}/${{ github.event.repository.name }}
-          
-          # السحب باستخدام بروتوكول git المباشر (أسرع وأضمن)
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git . || \
-          git clone --depth 1 http://github.com/oscam-emu/oscam.git .
+        # ده الحل الوحيد اللي بيستخدم التوكن الداخلي بتاع جيتهاب عشان يفتح السحب
+        uses: actions/checkout@v4
+        with:
+          repository: oscam-emu/oscam
+          path: '.'
+          clean: true
 
       - name: Get Oscam Revision
         id: get_rev
