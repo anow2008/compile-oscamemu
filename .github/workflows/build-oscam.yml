@@ -3,6 +3,10 @@ name: Build Oscam-SVN Modern-ARM4K
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,12 +14,14 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar xz-utils bzip2 git
+          sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar xz-utils bzip2
 
-      - name: Download Oscam Source
+      - name: Download Source (Direct Link)
         run: |
-          # استخدام git clone مع مسار محدد لتجنب خطأ 128 نهائياً
-          git clone --depth 1 https://github.com/oscam-emu/oscam.git oscam_src
+          # سحب السورس كملف مضغوط مباشرة لتفادي خطأ 128 نهائياً
+          curl -L "https://github.com/oscam-emu/oscam/archive/refs/heads/master.tar.gz" -o oscam.tar.gz
+          mkdir -p oscam_src
+          tar -xzf oscam.tar.gz -C oscam_src --strip-components=1
 
       - name: Get Revision
         id: get_rev
@@ -33,11 +39,10 @@ jobs:
       - name: Setup Stable Toolchain
         run: |
           mkdir -p toolchain
-          # تولشين مستقرة ومجربة 100% لأجهزة 4K
           curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
-      - name: Compile & Strip (Full Configuration)
+      - name: Compile & Strip (Full Config)
         run: |
           cd oscam_src
           make CROSS=arm-linux-gnueabi- \
