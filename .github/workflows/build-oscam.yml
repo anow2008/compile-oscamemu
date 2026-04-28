@@ -3,10 +3,6 @@ name: Build Oscam-SVN Modern-ARM4K
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-  actions: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,12 +10,11 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          # تصحيح اسم الحزمة ليتوافق مع نسخة Ubuntu الحديثة
           sudo apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libusb-1.0-0-dev zlib1g-dev libdvbcsa-dev patch curl gcc make tar xz-utils bzip2 git
 
-      - name: Checkout Oscam Source
+      - name: Download Oscam Source
         run: |
-          # استخدام git clone بسيط وتجنب مشاكل المسافات أو الروابط المعقدة
+          # استخدام git clone مع مسار محدد لتجنب خطأ 128 نهائياً
           git clone --depth 1 https://github.com/oscam-emu/oscam.git oscam_src
 
       - name: Get Revision
@@ -38,18 +33,16 @@ jobs:
       - name: Setup Stable Toolchain
         run: |
           mkdir -p toolchain
-          # العودة للتولشين المستقرة والمجربة لأجهزة ARM 4K
           curl -L "https://github.com/stay-at-home/toolchains/raw/master/arm-newnigma2-linux-gnueabi.tar.bz2" | tar -xj -C toolchain --strip-components=1
           echo "$(pwd)/toolchain/bin" >> $GITHUB_PATH
 
-      - name: Compile & Strip
+      - name: Compile & Strip (Full Menu)
         run: |
           cd oscam_src
           make CROSS=arm-linux-gnueabi- \
                CONF_DIR=/etc/tuxbox/config \
                USE_LIBCRYPTO=1 \
                USE_LIBDVBCSA=1 \
-               # --- القائمة الكاملة بدون اختصار ---
                WEBIF=1 \
                WEBIF_LIVELOG=1 \
                WEBIF_JQUERY=1 \
